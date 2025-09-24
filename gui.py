@@ -55,15 +55,15 @@ except Exception as e:
 
 # Frame principal para contener los widgets sobre el fondo
 frame_principal = tkinter.Frame(app, bg="", bd=0)
-frame_principal.place(relx=0.5, rely=0.5, anchor="center")
+frame_principal.place(relx=0.5, rely=0.9, anchor="center")
 
 tkinter.Button(
     frame_principal,
     text="Iniciar Simulación",
     anchor="center",
     font=("Arial", 14, "bold"),
-    bg="#16213e",
-    fg="white",
+    bg="#e8c00d",
+    fg="black",
     pady=10,
     padx=20,
     relief="raised",
