@@ -1,5 +1,31 @@
 import tkinter
+from tkinter import filedialog, messagebox
+import numpy as np
 
+# Variable global para almacenar el mapa cargado
+mapa_actual = None
+
+def cargar_mapa():
+    global mapa_actual
+    
+    # Abrir ventana para seleccionar un archivo
+    file_path = filedialog.askopenfilename(
+        title="Seleccionar archivo de mapa",
+        filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
+    )
+    
+    if file_path:  # Si efectivamente se seleccionó un archivo
+        try:
+            # Cargar el archivo directamente como array usando numpy
+            mapa_actual = np.loadtxt(file_path, dtype=int)
+            return mapa_actual
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo cargar el archivo: {e}")
+            mapa_actual = None
+            return None
+
+# ----------------- INICIAR LA APP Y CONFIGURACION -----------------
 app = tkinter.Tk()
 
 app.title("Smart Astronaut")
@@ -59,15 +85,16 @@ frame_principal.place(relx=0.5, rely=0.9, anchor="center")
 
 tkinter.Button(
     frame_principal,
-    text="Iniciar Simulación",
+    text="CARGAR MAPA",
     anchor="center",
-    font=("Arial", 14, "bold"),
+    font=("Comic Sans Ms", 16, "bold"),
     bg="#e8c00d",
     fg="black",
     pady=10,
     padx=20,
     relief="raised",
-    bd=3
+    bd=3,
+    command=cargar_mapa
 ).pack(pady=20)
 
 app.mainloop()
