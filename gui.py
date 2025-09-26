@@ -26,6 +26,7 @@ def cargar_mapa():
             return None
 
 # ----------------- INICIAR LA APP Y CONFIGURACION -----------------
+
 app = tkinter.Tk()
 
 app.title("Smart Astronaut")
