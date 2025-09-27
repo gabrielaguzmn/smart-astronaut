@@ -1,9 +1,26 @@
 import tkinter
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, Toplevel
 import numpy as np
 
 # Variable global para almacenar el mapa cargado
 mapa_actual = None
+
+def cargar_fondo(app, ruta_imagen):
+    try:
+        # Cargar la imagen de fondo
+        imagen_fondo = tkinter.PhotoImage(file=ruta_imagen)
+        
+        # Crear un label para mostrar la imagen de fondo
+        label_fondo = tkinter.Label(app, image=imagen_fondo)
+        label_fondo.place(x=0, y=0, relwidth=1, relheight=1)
+        
+        # Mantener la referencia a la imagen para que no se borre
+        app.imagen_fondo = imagen_fondo
+
+    except Exception as e:
+        print("No se pudo cargar la imagen de fondo:", e)
+        # Si no se puede cargar la imagen, usar un color de fondo
+        app.configure(bg="#1a1a2e")
 
 def cargar_mapa():
     global mapa_actual
@@ -18,12 +35,20 @@ def cargar_mapa():
         try:
             # Cargar el archivo directamente como array usando numpy
             mapa_actual = np.loadtxt(file_path, dtype=int)
+            actualizar_pantalla()
             return mapa_actual
             
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo cargar el archivo: {e}")
             mapa_actual = None
             return None
+        
+def actualizar_pantalla():
+    # eliminar widgets viejos
+    for widget in app.winfo_children():
+        widget.destroy()
+    
+    cargar_fondo(app, "assets/secondary-background.png")
 
 # ----------------- INICIAR LA APP Y CONFIGURACION -----------------
 
@@ -61,23 +86,7 @@ except Exception as e:
     print("No se pudo cargar el ícono:", e)
 
 # ------------------------ IMAGEN DE FONDO -------------------------
-
-try:
-    # Cargar la imagen de fondo
-    imagen_fondo = tkinter.PhotoImage(file="assets/main-background.png")
-    
-    # Crear un label para mostrar la imagen de fondo
-    label_fondo = tkinter.Label(app, image=imagen_fondo)
-    label_fondo.place(x=0, y=0, relwidth=1, relheight=1)
-    
-    # Importante: mantener una referencia de la imagen
-    app.imagen_fondo = imagen_fondo
-    
-except Exception as e:
-    print("No se pudo cargar la imagen de fondo:", e)
-    # Si no se puede cargar la imagen, usar un color de fondo
-    app.configure(bg="#1a1a2e")
-
+cargar_fondo(app, "assets/main-background.png")
 # ------------------------------------------------------------------
 
 # Frame principal para contener los widgets sobre el fondo
