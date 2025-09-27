@@ -17,7 +17,7 @@ class Nodo:
     """
     def __init__(self, padre: "Nodo", ubicacion: tuple, mapa: list[list[int]],
                  nave: tuple[bool, int], muestras: int, 
-                 costo: int = None, heuristica = None):
+                 costo: bool = None, heuristica = None):
         # Para el estado del nodo
         self.padre = padre
         self.ubicacion = ubicacion
