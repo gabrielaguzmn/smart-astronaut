@@ -209,13 +209,18 @@ def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
     if(llego_a_una_muestra or llego_a_la_nave):
         mapa_nuevo[nuevo_x][nuevo_y] = 0
 
-    nodo_hijo = Nodo(nodo, (nuevo_x, nuevo_y), mapa_nuevo, [nodo.getNave(), nodo.getCombustible()], nodo.getMuestras())
+    # Determinar los valores finales para nave y muestras
+    if llego_a_la_nave:
+        nave_nueva = [True, 20]
+    else:
+        nave_nueva = [nodo.getNave(), nodo.getCombustible()]
 
-    if (llego_a_la_nave):
-        nodo_hijo = Nodo(nodo, (nuevo_x, nuevo_y), mapa_nuevo, [True, 20], nodo.getMuestras())
-    if (llego_a_una_muestra): 
-        nodo_hijo = Nodo(nodo, (nuevo_x, nuevo_y), mapa_nuevo, [nodo.getNave(), nodo.getCombustible()], nodo.getMuestras()+1)
+    if llego_a_una_muestra:
+        muestras_nuevas = nodo.getMuestras() + 1
+    else:
+        muestras_nuevas = nodo.getMuestras()
 
+    nodo_hijo = Nodo(nodo, (nuevo_x, nuevo_y), mapa_nuevo, nave_nueva, muestras_nuevas)
     no_se_devuelve = (padre.estado() != nodo_hijo.estado()) if padre is not None else True
 
     return nodo_hijo if no_se_devuelve else None
