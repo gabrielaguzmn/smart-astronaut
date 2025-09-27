@@ -150,8 +150,6 @@ class Arbol:
         self.nodos_expandidos = self.nodos_expandidos + 1
         if nodo.getProfundidad() > self.profundidad:
             self.profundidad = nodo.getProfundidad()
-        if nodo.getCosto() > self.costo:
-            self.costo = nodo.getCosto()
 
     def expandir_nodo(self, indice: int):
         """
