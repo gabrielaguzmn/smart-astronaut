@@ -1,9 +1,18 @@
 import tkinter
-from tkinter import filedialog, messagebox, Toplevel
+from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk
 import numpy as np
 
-# Variable global para almacenar el mapa cargado
 mapa_actual = None
+iconos = {
+    0: Image.open("assets/libre.png"),
+    1: Image.open("assets/obstaculo.png"),
+    2: Image.open("assets/astronauta.png"),
+    3: Image.open("assets/rocas.png"),
+    4: Image.open("assets/volcan.png"),
+    5: Image.open("assets/nave.png"),
+    6: Image.open("assets/muestras.png")
+}
 
 def cargar_fondo(app, ruta_imagen):
     try:
@@ -43,12 +52,43 @@ def cargar_mapa():
             mapa_actual = None
             return None
         
+def dibujar_matriz(app, mapa):
+    # Crear frame contenedor con tamaño fijo
+    recuadro = tkinter.Frame(app, bg="white", highlightbackground="black", highlightthickness=2,
+                             width=600, height=600)
+    recuadro.place(x=40, y=45)
+    recuadro.pack_propagate(False)
+
+    # Calcular tamaños de celdas
+    filas, columnas = len(mapa), len(mapa[0])
+    ancho_celda = 600 // columnas
+    alto_celda = 600 // filas
+
+    # Dibujar celdas
+    for x in range(filas):
+        for y in range(columnas):
+            valor = mapa[x][y]
+            celda = tkinter.Label(recuadro, borderwidth=1, relief="solid")
+            
+            if valor in iconos and iconos[valor]:
+                img_resized = iconos[valor].resize((ancho_celda-2, alto_celda-2), Image.Resampling.LANCZOS)
+                tk_img = ImageTk.PhotoImage(img_resized)
+                celda.config(image=tk_img)
+                celda.image = tk_img
+            else:
+                celda.config(text=str(valor))
+
+            celda.grid(row=x, column=y, sticky="nsew")
+
+    return recuadro
+        
 def actualizar_pantalla():
     # eliminar widgets viejos
     for widget in app.winfo_children():
         widget.destroy()
     
     cargar_fondo(app, "assets/secondary-background.png")
+    dibujar_matriz(app, mapa_actual)
 
 # ----------------- INICIAR LA APP Y CONFIGURACION -----------------
 
@@ -65,7 +105,7 @@ app.update_idletasks()
 ancho_pantalla = app.winfo_screenwidth()
 alto_pantalla = app.winfo_screenheight()
 
-ancho_app = 800
+ancho_app = 1070
 alto_app = 700
 
 centrar_x = (ancho_pantalla - ancho_app) // 2
