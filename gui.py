@@ -3,9 +3,10 @@ from tkinter import filedialog, messagebox, ttk
 from PIL import Image, ImageTk
 import numpy as np
 
+from Busqueda_no_informada.coste_uniforme import coste_uniforme
+
 mapa_actual = None
-reporte = None
-tiempo = None
+reporte_texto = None
 iconos = {
     0: Image.open("assets/libre.png"),
     1: Image.open("assets/obstaculo.png"),
@@ -84,36 +85,9 @@ def dibujar_matriz(app, mapa):
 
     return recuadro
 
-def btn_recorrer_mapa(app, texto, font_size):
-    tkinter.Button(
-        app,
-        text=texto,
-        anchor="center",
-        font=("Comic Sans Ms", font_size, "bold"),
-        bg="#0dd2e8",
-        fg="black",
-        pady=10,
-        padx=10,
-        relief="raised",
-        bd=3,
-    ).pack(pady=0)
-
-def btn_cargar_mapa(app, texto, font_size):
-    tkinter.Button(
-        app,
-        text=texto,
-        anchor="center",
-        font=("Comic Sans Ms", font_size, "bold"),
-        bg="#e8c00d",
-        fg="black",
-        pady=10,
-        padx=10,
-        relief="raised",
-        bd=3,
-        command=cargar_mapa
-    ).pack(pady=20)
-
 def ver_reporte(app):
+    global reporte_texto
+
     tkinter.Label(
         app, 
         text="REPORTE",
@@ -122,23 +96,15 @@ def ver_reporte(app):
         pady=5
     ).pack(pady=10)
 
-    if reporte:
-        nodos = reporte["Nodos expandidos"]
-        profundidad = reporte["Profundidad"]
-        tiempo = reporte["Tiempo"]
-        costo = reporte["Costo"]
-    else:
-        nodos = 0
-        profundidad = 0
-        tiempo = 0
-        costo = 0
+    reporte_texto = tkinter.StringVar()
+    reporte_texto.set("Nodos expandidos: 0\n" +
+                      "Profundidad del árbol: 0\n" +
+                      "Tiempo: 0 segundos\n" +
+                      "Costo: 0",)
 
     tkinter.Label(
         app, 
-        text=f"Nodos expandidos: {nodos}\n" +
-             f"Profundidad del árbol: {profundidad}\n" +
-             f"Tiempo: {tiempo} segundos\n" +
-             f"Costo: {costo}",
+        textvariable=reporte_texto,
         font=("Comic Sans Ms", 13),
         bg="white",
         justify="center",
@@ -197,7 +163,64 @@ def seleccionar_algoritmo(app):
     # inicializar con valores por defecto
     actualizar_algoritmos()
 
-    return busquedas_frame
+    return busquedas_frame, tipo_algoritmo
+
+def ejecutar_algoritmo(algoritmo):
+    global reporte_texto
+
+    if algoritmo == "Amplitud":
+        print("Amplitud")
+    elif algoritmo == "Costo uniforme":
+        datos = coste_uniforme(mapa_actual)
+    elif algoritmo == "Profundidad evitando ciclos":
+        print("Profundidad evitando ciclos")
+    elif algoritmo == "Avara":
+        print("Avara")
+    elif algoritmo == "A*":
+        print("A*")
+    else:
+        messagebox.ERROR("No deberias estar viendo esto, si es así avisale a David")
+
+    camino = datos["Camino"]
+    nodos = datos["Reporte"]["Nodos expandidos"]
+    profundidad = datos["Reporte"]["Profundidad"]
+    costo = datos["Reporte"]["Costo"]
+    tiempo = datos["Reporte"]["Tiempo"]
+
+    reporte_texto.set(f"Nodos expandidos: {nodos}\n" + 
+                      f"Profundidad del árbol: {profundidad}\n" +
+                      f"Tiempo: {tiempo:.6f} segundos\n" +
+                      f"Costo: {costo}")
+
+def btn_recorrer_mapa(app, texto, font_size, algoritmo):
+    tkinter.Button(
+        app,
+        text=texto,
+        anchor="center",
+        font=("Comic Sans Ms", font_size, "bold"),
+        bg="#0dd2e8",
+        fg="black",
+        pady=10,
+        padx=10,
+        relief="raised",
+        bd=3,
+        command=lambda: ejecutar_algoritmo(algoritmo.get())
+    ).pack(pady=0)
+
+def btn_cargar_mapa(app, texto, font_size):
+    tkinter.Button(
+        app,
+        text=texto,
+        anchor="center",
+        font=("Comic Sans Ms", font_size, "bold"),
+        bg="#e8c00d",
+        fg="black",
+        pady=10,
+        padx=10,
+        relief="raised",
+        bd=3,
+        command=cargar_mapa
+    ).pack(pady=20)
 
 def dibujar_acciones(app):
     acciones = tkinter.Frame(app, bg="white", highlightbackground="black", highlightthickness=3,
@@ -206,8 +229,8 @@ def dibujar_acciones(app):
     acciones.pack_propagate(False)
 
     ver_reporte(acciones)    
-    seleccionar_algoritmo(acciones)
-    btn_recorrer_mapa(acciones, "RECORRER EL MAPA", 14)
+    _, algoritmo = seleccionar_algoritmo(acciones)
+    btn_recorrer_mapa(acciones, "RECORRER EL MAPA", 14, algoritmo)
     btn_cargar_mapa(acciones, "CARGAR NUEVO MAPA", 14)
 
     return acciones

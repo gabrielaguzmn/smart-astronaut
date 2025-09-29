@@ -100,5 +100,5 @@ def coste_uniforme(mapa: list[list[int]]):
         exito = arbol.expandir_nodo(i)
         if exito is not None:
             exito["Reporte"]["Costo"] = arbol.arbol[i].getCosto()
-            exito["Tiempo"] = f"{time.perf_counter() - start_time} segundos"
+            exito["Reporte"]["Tiempo"] = time.perf_counter() - start_time
             return exito
