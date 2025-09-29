@@ -4,6 +4,8 @@ from PIL import Image, ImageTk
 import numpy as np
 
 mapa_actual = None
+reporte = None
+tiempo = None
 iconos = {
     0: Image.open("assets/libre.png"),
     1: Image.open("assets/obstaculo.png"),
@@ -82,6 +84,20 @@ def dibujar_matriz(app, mapa):
 
     return recuadro
 
+def btn_recorrer_mapa(app, texto, font_size):
+    tkinter.Button(
+        app,
+        text=texto,
+        anchor="center",
+        font=("Comic Sans Ms", font_size, "bold"),
+        bg="#0dd2e8",
+        fg="black",
+        pady=10,
+        padx=10,
+        relief="raised",
+        bd=3,
+    ).pack(pady=0)
+
 def btn_cargar_mapa(app, texto, font_size):
     tkinter.Button(
         app,
@@ -97,14 +113,49 @@ def btn_cargar_mapa(app, texto, font_size):
         command=cargar_mapa
     ).pack(pady=20)
 
+def ver_reporte(app):
+    tkinter.Label(
+        app, 
+        text="REPORTE",
+        font=("Comic Sans Ms", 22, "bold"),
+        bg="white",
+        pady=5
+    ).pack(pady=10)
+
+    if reporte:
+        nodos = reporte["Nodos expandidos"]
+        profundidad = reporte["Profundidad"]
+        tiempo = reporte["Tiempo"]
+        costo = reporte["Costo"]
+    else:
+        nodos = 0
+        profundidad = 0
+        tiempo = 0
+        costo = 0
+
+    tkinter.Label(
+        app, 
+        text=f"Nodos expandidos: {nodos}\n" +
+             f"Profundidad del árbol: {profundidad}\n" +
+             f"Tiempo: {tiempo} segundos\n" +
+             f"Costo: {costo}",
+        font=("Comic Sans Ms", 13),
+        bg="white",
+        justify="center",
+        pady=5
+    ).pack(pady=0)
+
 def seleccionar_algoritmo(app):
-    busquedas_frame = tkinter.Frame(app, bg="blue", pady=20)
-    busquedas_frame.pack()
+    label_font_size = 14
+
+    busquedas_frame = tkinter.Frame(app, bg="white", pady=20)
+    busquedas_frame.pack(pady=25)
+    busquedas_frame.option_add("*TCombobox*Listbox.font", ("Comic Sans MS", 10))
     
     tkinter.Label(
         busquedas_frame,
         text="Tipo de búsqueda:",
-        font=("Comic Sans Ms", 14),
+        font=("Comic Sans Ms", label_font_size),
         bg="white"
     ).pack()
     
@@ -120,7 +171,7 @@ def seleccionar_algoritmo(app):
     tkinter.Label(
         busquedas_frame,
         text="Algoritmo de búsqueda:",
-        font=("Comic Sans Ms", 14),
+        font=("Comic Sans Ms", label_font_size),
         bg="white"
     ).pack()
 
@@ -149,33 +200,15 @@ def seleccionar_algoritmo(app):
     return busquedas_frame
 
 def dibujar_acciones(app):
-    acciones = tkinter.Frame(app, bg="white", highlightbackground="black", highlightthickness=2,
-                             width=300, height=600)
+    acciones = tkinter.Frame(app, bg="white", highlightbackground="black", highlightthickness=3,
+                             width=320, height=600)
     acciones.place(x=690, y=45)
     acciones.pack_propagate(False)
-    
-    tkinter.Label(
-        acciones, 
-        text="REPORTE",
-        font=("Comic Sans Ms", 22, "bold"),
-        bg="white",
-        pady=20
-    ).pack()
 
-    tkinter.Label(
-        acciones, 
-        text=f"Nodos expandidos: {0}\n" +
-             f"Profundidad del árbol: {0}\n" +
-             f"Tiempo de cómputo: {0} segundos\n" +
-             f"Costo: {0}",
-        font=("Comic Sans Ms", 12),
-        bg="white",
-        justify="center",
-        pady=20
-    ).pack()
-    
+    ver_reporte(acciones)    
     seleccionar_algoritmo(acciones)
-    btn_cargar_mapa(acciones, "CARGAR NUEVO MAPA", 16)
+    btn_recorrer_mapa(acciones, "RECORRER EL MAPA", 14)
+    btn_cargar_mapa(acciones, "CARGAR NUEVO MAPA", 14)
 
     return acciones
         
@@ -223,12 +256,14 @@ except Exception as e:
     print("No se pudo cargar el ícono:", e)
 
 # ------------------------ IMAGEN DE FONDO -------------------------
+
 cargar_fondo(app, "assets/main-background.png")
+
 # ------------------------------------------------------------------
 
 frame_principal = tkinter.Frame(app, bg="", bd=0)
 frame_principal.place(relx=0.5, rely=0.9, anchor="center")
 
-btn_cargar_mapa(frame_principal, "CARGAR NUEVO MAPA", 16)
+btn_cargar_mapa(frame_principal, "CARGAR MAPA", 16)
 
 app.mainloop()
