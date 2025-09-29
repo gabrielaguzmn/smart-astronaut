@@ -1,5 +1,5 @@
 import tkinter
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 from PIL import Image, ImageTk
 import numpy as np
 
@@ -81,6 +81,103 @@ def dibujar_matriz(app, mapa):
             celda.grid(row=x, column=y, sticky="nsew")
 
     return recuadro
+
+def btn_cargar_mapa(app, texto, font_size):
+    tkinter.Button(
+        app,
+        text=texto,
+        anchor="center",
+        font=("Comic Sans Ms", font_size, "bold"),
+        bg="#e8c00d",
+        fg="black",
+        pady=10,
+        padx=10,
+        relief="raised",
+        bd=3,
+        command=cargar_mapa
+    ).pack(pady=20)
+
+def seleccionar_algoritmo(app):
+    busquedas_frame = tkinter.Frame(app, bg="blue", pady=20)
+    busquedas_frame.pack()
+    
+    tkinter.Label(
+        busquedas_frame,
+        text="Tipo de búsqueda:",
+        font=("Comic Sans Ms", 14),
+        bg="white"
+    ).pack()
+    
+    tipo_busqueda = ttk.Combobox(
+        busquedas_frame,
+        state="readonly",
+        values=["Búsqueda no informada", "Búsqueda informada"],
+        width=30
+    )
+    tipo_busqueda.pack(pady=5)
+    tipo_busqueda.set("Búsqueda no informada")
+
+    tkinter.Label(
+        busquedas_frame,
+        text="Algoritmo de búsqueda:",
+        font=("Comic Sans Ms", 14),
+        bg="white"
+    ).pack()
+
+    tipo_algoritmo = ttk.Combobox(
+        busquedas_frame,
+        state="readonly",
+        width=30
+    )
+    tipo_algoritmo.pack(pady=5)
+
+    # función para actualizar los algoritmos
+    def actualizar_algoritmos(event=None):
+        if tipo_busqueda.get() == "Búsqueda no informada":
+            tipo_algoritmo["values"] = ["Amplitud", "Costo uniforme", "Profundidad evitando ciclos"]
+            tipo_algoritmo.set("Amplitud")
+        else:
+            tipo_algoritmo["values"] = ["Avara", "A*"]
+            tipo_algoritmo.set("Avara")
+
+    # enlazar el cambio de selección
+    tipo_busqueda.bind("<<ComboboxSelected>>", actualizar_algoritmos)
+
+    # inicializar con valores por defecto
+    actualizar_algoritmos()
+
+    return busquedas_frame
+
+def dibujar_acciones(app):
+    acciones = tkinter.Frame(app, bg="white", highlightbackground="black", highlightthickness=2,
+                             width=300, height=600)
+    acciones.place(x=690, y=45)
+    acciones.pack_propagate(False)
+    
+    tkinter.Label(
+        acciones, 
+        text="REPORTE",
+        font=("Comic Sans Ms", 22, "bold"),
+        bg="white",
+        pady=20
+    ).pack()
+
+    tkinter.Label(
+        acciones, 
+        text=f"Nodos expandidos: {0}\n" +
+             f"Profundidad del árbol: {0}\n" +
+             f"Tiempo de cómputo: {0} segundos\n" +
+             f"Costo: {0}",
+        font=("Comic Sans Ms", 12),
+        bg="white",
+        justify="center",
+        pady=20
+    ).pack()
+    
+    seleccionar_algoritmo(acciones)
+    btn_cargar_mapa(acciones, "CARGAR NUEVO MAPA", 16)
+
+    return acciones
         
 def actualizar_pantalla():
     # eliminar widgets viejos
@@ -89,11 +186,11 @@ def actualizar_pantalla():
     
     cargar_fondo(app, "assets/secondary-background.png")
     dibujar_matriz(app, mapa_actual)
-
+    dibujar_acciones(app)
+    
 # ----------------- INICIAR LA APP Y CONFIGURACION -----------------
 
 app = tkinter.Tk()
-
 app.title("Smart Astronaut")
 app.resizable(0, 0)
 
@@ -129,22 +226,9 @@ except Exception as e:
 cargar_fondo(app, "assets/main-background.png")
 # ------------------------------------------------------------------
 
-# Frame principal para contener los widgets sobre el fondo
 frame_principal = tkinter.Frame(app, bg="", bd=0)
 frame_principal.place(relx=0.5, rely=0.9, anchor="center")
 
-tkinter.Button(
-    frame_principal,
-    text="CARGAR MAPA",
-    anchor="center",
-    font=("Comic Sans Ms", 16, "bold"),
-    bg="#e8c00d",
-    fg="black",
-    pady=10,
-    padx=20,
-    relief="raised",
-    bd=3,
-    command=cargar_mapa
-).pack(pady=20)
+btn_cargar_mapa(frame_principal, "CARGAR NUEVO MAPA", 16)
 
 app.mainloop()
