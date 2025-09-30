@@ -1,5 +1,6 @@
 import tkinter
 from tkinter import filedialog, messagebox, ttk
+import pygame
 from PIL import Image, ImageTk
 import numpy as np
 
@@ -59,7 +60,7 @@ def dibujar_matriz(app, mapa):
     # Crear frame contenedor con tamaño fijo
     recuadro = tkinter.Frame(app, bg="white", highlightbackground="black", highlightthickness=2,
                              width=600, height=600)
-    recuadro.place(x=40, y=45)
+    recuadro.place(x=40, y=51)
     recuadro.pack_propagate(False)
 
     # Calcular tamaños de celdas
@@ -225,7 +226,7 @@ def btn_cargar_mapa(app, texto, font_size):
 def dibujar_acciones(app):
     acciones = tkinter.Frame(app, bg="white", highlightbackground="black", highlightthickness=3,
                              width=320, height=600)
-    acciones.place(x=690, y=45)
+    acciones.place(x=690, y=51)
     acciones.pack_propagate(False)
 
     ver_reporte(acciones)    
@@ -243,12 +244,30 @@ def actualizar_pantalla():
     cargar_fondo(app, "assets/secondary-background.png")
     dibujar_matriz(app, mapa_actual)
     dibujar_acciones(app)
+    botones_musica(app)
     
 # ----------------- INICIAR LA APP Y CONFIGURACION -----------------
 
 app = tkinter.Tk()
 app.title("Smart Astronaut")
 app.resizable(0, 0)
+
+# ----------------- REPRODUCCION DE MUSICA DE FONDO ----------------
+
+def detener():
+    pygame.mixer.music.stop()
+
+def reproducir():
+    pygame.mixer.music.load("assets/Hangar-18.mp3")
+    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.play()
+
+def botones_musica(app):
+    btn_play = tkinter.Button(app, text="🔊", command=reproducir, font=("Comic Sans Ms", 13), width=3)
+    btn_play.place(relx=0.9, rely=0.01)
+
+    btn_stop = tkinter.Button(app, text="🔇", command=detener, font=("Comic Sans Ms", 13))
+    btn_stop.place(relx=0.95, rely=0.01)
 
 # --------------------- DIMENSIONES Y CENTRADO ---------------------
 
@@ -286,6 +305,10 @@ cargar_fondo(app, "assets/main-background.png")
 
 frame_principal = tkinter.Frame(app, bg="", bd=0)
 frame_principal.place(relx=0.5, rely=0.9, anchor="center")
+
+pygame.mixer.init()
+reproducir()
+botones_musica(app)
 
 btn_cargar_mapa(frame_principal, "CARGAR MAPA", 16)
 
