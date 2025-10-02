@@ -5,10 +5,10 @@ from PIL import Image, ImageTk
 import numpy as np
 
 from Busqueda_no_informada.coste_uniforme import coste_uniforme
+from Busqueda_informada.avara import avara
 # Las siguientes importaciones se activarán cuando se implementen los algoritmos
 # from Busqueda_no_informada.amplitud import amplitud
 # from Busqueda_no_informada.profundidad_sin_ciclos import profundidad_sin_ciclos
-# from Busqueda_informada.avara import avara
 # from Busqueda_informada.A_estrella import a_estrella
 
 mapa_actual = None
@@ -399,8 +399,11 @@ def ejecutar_algoritmo(algoritmo):
         messagebox.showinfo("Información", "Algoritmo de Profundidad aún no implementado")
         return
     elif algoritmo == "Avara":
-        messagebox.showinfo("Información", "Algoritmo Avaro aún no implementado")
-        return
+        try:
+            datos = avara(mapa_original)
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
+            return
     elif algoritmo == "A*":
         messagebox.showinfo("Información", "Algoritmo A* aún no implementado")
         return
