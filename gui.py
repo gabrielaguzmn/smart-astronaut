@@ -7,7 +7,7 @@ import numpy as np
 from Busqueda_no_informada.coste_uniforme import coste_uniforme
 from Busqueda_informada.avara import avara
 # Las siguientes importaciones se activarán cuando se implementen los algoritmos
-# from Busqueda_no_informada.amplitud import amplitud
+from Busqueda_no_informada.amplitud import amplitud
 # from Busqueda_no_informada.profundidad_sin_ciclos import profundidad_sin_ciclos
 # from Busqueda_informada.A_estrella import a_estrella
 
@@ -387,8 +387,11 @@ def ejecutar_algoritmo(algoritmo):
     datos = None
     
     if algoritmo == "Amplitud":
-        messagebox.showinfo("Información", "Algoritmo de Amplitud aún no implementado")
-        return
+        try:
+            datos = amplitud(mapa_original)
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
+            return
     elif algoritmo == "Costo uniforme":
         try:
             datos = coste_uniforme(mapa_original)
@@ -442,12 +445,13 @@ def btn_recorrer_mapa(app, texto, font_size, algoritmo):
         font=("Comic Sans Ms", font_size, "bold"),
         bg="#0dd2e8",
         fg="black",
-        pady=10,
+        pady=5,
         padx=10,
+        width=20,
         relief="raised",
         bd=3,
         command=lambda: ejecutar_algoritmo(algoritmo.get())
-    ).pack(pady=0)
+    ).pack(pady=5)
 
 def btn_cargar_mapa(app, texto, font_size):
     tkinter.Button(
@@ -479,6 +483,7 @@ def btn_detener_animacion(app, texto, font_size):
         fg="white",
         pady=5,
         padx=10,
+        width=20,
         relief="raised",
         bd=3,
         command=detener_animacion
@@ -539,6 +544,7 @@ def btn_reiniciar_mapa(app, texto, font_size):
         fg="black",
         pady=5,
         padx=10,
+        width=20,
         relief="raised",
         bd=3,
         command=reiniciar_mapa
@@ -552,10 +558,10 @@ def dibujar_acciones(app):
 
     ver_reporte(acciones)    
     _, algoritmo = seleccionar_algoritmo(acciones)
-    btn_recorrer_mapa(acciones, "RECORRER EL MAPA", 13, algoritmo)
+    btn_recorrer_mapa(acciones, "RECORRER EL MAPA", 11, algoritmo)
     
     btn_reiniciar_mapa(acciones, "REINICIAR MAPA", 11)
-    btn_cargar_mapa(acciones, "CARGAR NUEVO MAPA", 12)
+    btn_cargar_mapa(acciones, "CARGAR NUEVO MAPA", 11)
 
     return acciones
         
