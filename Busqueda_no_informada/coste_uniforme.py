@@ -47,7 +47,7 @@ def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
     else:
         if terreno_rocoso:
             coste_nuevo = nodo.getCosto() + 3
-        if terreno_volcanico:
+        elif terreno_volcanico:
             coste_nuevo = nodo.getCosto() + 5
         else:
             coste_nuevo = nodo.getCosto() + 1

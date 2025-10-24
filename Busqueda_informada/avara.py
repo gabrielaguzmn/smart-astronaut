@@ -168,7 +168,7 @@ def avara(mapa: list[list[int]]):
             if nodo_meta:
                 exito["Reporte"]["Costo"] = nodo_meta.getCosto()
             exito["Reporte"]["Tiempo"] = time.perf_counter() - start_time
-            exito["Reporte"]["Iteraciones"] = iteracion
+            
             return exito
     
     return {

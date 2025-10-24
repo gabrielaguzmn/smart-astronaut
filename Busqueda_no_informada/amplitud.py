@@ -47,13 +47,14 @@ def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
     else:
         if terreno_rocoso:
             coste_nuevo = nodo.getCosto() + 3
-        if terreno_volcanico:
+        elif terreno_volcanico:
             coste_nuevo = nodo.getCosto() + 5
         else:
             coste_nuevo = nodo.getCosto() + 1
 
     nodo_hijo = Nodo(nodo, (nuevo_x, nuevo_y), mapa_nuevo, nave_nueva, muestras_nuevas, coste_nuevo)
     no_se_devuelve = (padre.estado() != nodo_hijo.estado()) if padre is not None else True
+
 
     return nodo_hijo if no_se_devuelve else None
 
@@ -74,13 +75,26 @@ movimientos = [lambda n: mover_izquierda(n),
                lambda n: mover_arriba(n), 
                lambda n: mover_abajo(n)]
 
+
 def amplitud(mapa: list[list[int]]):
     start_time = time.perf_counter()
     arbol = Arbol(mapa, movimientos)
+    
+    estados_visitados = set()
 
     while True:
-        i = 0
+        i = 0 
+        
+        nodo_actual = arbol.arbol[i]
+        estado_actual = nodo_actual.estado()
+        
+        if estado_actual in estados_visitados:
+            arbol.arbol.pop(i)
+            continue
+        
+        # estados_visitados.add(estado_actual)
         exito = arbol.expandir_nodo(i)
+        
         if exito is not None:
             exito["Reporte"]["Tiempo"] = time.perf_counter() - start_time
             return exito

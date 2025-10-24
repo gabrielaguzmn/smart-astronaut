@@ -41,21 +41,35 @@ def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
         muestras_nuevas = nodo.getMuestras() + 1
         mapa_nuevo[nuevo_x][nuevo_y] = 0   
 
+    # Calcular costo del movimiento
     if (nodo.getNave() and nodo.getCombustible() > 0):
         coste_nuevo = nodo.getCosto() + 0.5
         nave_nueva = [True, nodo.getCombustible() - 1]
     else:
         if terreno_rocoso:
             coste_nuevo = nodo.getCosto() + 3
-        if terreno_volcanico:
+        elif terreno_volcanico:  # ✅ CORREGIDO
             coste_nuevo = nodo.getCosto() + 5
         else:
             coste_nuevo = nodo.getCosto() + 1
 
     nodo_hijo = Nodo(nodo, (nuevo_x, nuevo_y), mapa_nuevo, nave_nueva, muestras_nuevas, coste_nuevo)
-    no_se_devuelve = (padre.estado() != nodo_hijo.estado()) if padre is not None else True
+    
+    if verificar_ciclos(padre, nodo_hijo.estado()):
+        return None
+    
+    return nodo_hijo
 
-    return nodo_hijo if no_se_devuelve else None
+def verificar_ciclos(nodo: Nodo, estado_actual):
+    """
+    Verifica si en una rama del árbol de búsqueda ya se ha visitado 
+    el estado actual.
+    """
+    while nodo is not None:
+        if nodo.estado() == estado_actual:
+            return True  # Hay ciclo
+        nodo = nodo.getPadre()
+    return False  # No hay ciclo
 
 def mover_izquierda(nodo: Nodo) -> Nodo | None:
     return mover(nodo, 0, -1)
@@ -74,13 +88,14 @@ movimientos = [lambda n: mover_izquierda(n),
                lambda n: mover_arriba(n), 
                lambda n: mover_abajo(n)]
 
-def verificar_ciclos(nodo: Nodo, estado_actual):
-    """
-    Verifica si en una rama del árbol de búsqueda ya se ha visitado 
-    el estado actual.
-    """
-    while nodo is not None:
-        if nodo.estado() == estado_actual:
-            return True  
-        nodo = nodo.getPadre()
-    return False
+def profundidad_sin_ciclos(mapa: list[list[int]]):
+    start_time = time.perf_counter()
+    arbol = Arbol(mapa, movimientos)
+    
+    while True:
+        i = len(arbol.arbol) - 1
+        exito = arbol.expandir_nodo(i)
+        
+        if exito is not None:
+            exito["Reporte"]["Tiempo"] = time.perf_counter() - start_time
+            return exito

@@ -8,7 +8,7 @@ from Busqueda_no_informada.coste_uniforme import coste_uniforme
 from Busqueda_informada.avara import avara
 # Las siguientes importaciones se activarán cuando se implementen los algoritmos
 from Busqueda_no_informada.amplitud import amplitud
-# from Busqueda_no_informada.profundidad_sin_ciclos import profundidad_sin_ciclos
+from Busqueda_no_informada.profundidad_sin_ciclos import profundidad_sin_ciclos
 # from Busqueda_informada.A_estrella import a_estrella
 
 mapa_actual = None
@@ -399,8 +399,11 @@ def ejecutar_algoritmo(algoritmo):
             messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
             return
     elif algoritmo == "Profundidad evitando ciclos":
-        messagebox.showinfo("Información", "Algoritmo de Profundidad aún no implementado")
-        return
+        try:
+            datos = profundidad_sin_ciclos(mapa_original)
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
+            return
     elif algoritmo == "Avara":
         try:
             datos = avara(mapa_original)
@@ -447,7 +450,7 @@ def btn_recorrer_mapa(app, texto, font_size, algoritmo):
         fg="black",
         pady=5,
         padx=10,
-        width=20,
+        width=24,
         relief="raised",
         bd=3,
         command=lambda: ejecutar_algoritmo(algoritmo.get())
@@ -461,12 +464,13 @@ def btn_cargar_mapa(app, texto, font_size):
         font=("Comic Sans Ms", font_size, "bold"),
         bg="#e8c00d",
         fg="black",
-        pady=10,
+        pady=5,
         padx=10,
+        width=24,
         relief="raised",
         bd=3,
         command=cargar_mapa
-    ).pack(pady=20)
+    ).pack(pady=5)
 
 def btn_detener_animacion(app, texto, font_size):
     def detener_animacion():
@@ -480,10 +484,10 @@ def btn_detener_animacion(app, texto, font_size):
         anchor="center",
         font=("Comic Sans Ms", font_size, "bold"),
         bg="#e85a0d",
-        fg="white",
+        fg="black",
         pady=5,
         padx=10,
-        width=20,
+        width=24,
         relief="raised",
         bd=3,
         command=detener_animacion
@@ -544,7 +548,7 @@ def btn_reiniciar_mapa(app, texto, font_size):
         fg="black",
         pady=5,
         padx=10,
-        width=20,
+        width=24,
         relief="raised",
         bd=3,
         command=reiniciar_mapa
@@ -552,16 +556,16 @@ def btn_reiniciar_mapa(app, texto, font_size):
 
 def dibujar_acciones(app):
     acciones = tkinter.Frame(app, bg="white", highlightbackground="black", highlightthickness=3,
-                             width=320, height=600)
-    acciones.place(x=690, y=51)
+                             width=320, height=603)
+    acciones.place(x=690, y=52)
     acciones.pack_propagate(False)
 
     ver_reporte(acciones)    
     _, algoritmo = seleccionar_algoritmo(acciones)
-    btn_recorrer_mapa(acciones, "RECORRER EL MAPA", 11, algoritmo)
-    
-    btn_reiniciar_mapa(acciones, "REINICIAR MAPA", 11)
-    btn_cargar_mapa(acciones, "CARGAR NUEVO MAPA", 11)
+    btn_recorrer_mapa(acciones, "RECORRER EL MAPA", 9, algoritmo)
+    btn_detener_animacion(acciones, "DETENER ANIMACIÓN", 9)
+    btn_reiniciar_mapa(acciones, "REINICIAR MAPA", 9)
+    btn_cargar_mapa(acciones, "CARGAR NUEVO MAPA", 9)
 
     return acciones
         
@@ -601,7 +605,7 @@ def botones_musica(app):
     btn_play = tkinter.Button(app, text="🔊", command=reproducir, font=("Comic Sans Ms", 13), width=3)
     btn_play.place(relx=0.9, rely=0.01)
 
-    btn_stop = tkinter.Button(app, text="🔇", command=detener, font=("Comic Sans Ms", 13))
+    btn_stop = tkinter.Button(app, text="🔇", command=detener, font=("Comic Sans Ms", 13),width=3)
     btn_stop.place(relx=0.95, rely=0.01)
 
 # --------------------- DIMENSIONES Y CENTRADO ---------------------
