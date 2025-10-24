@@ -6,6 +6,7 @@ import numpy as np
 
 from Busqueda_no_informada.coste_uniforme import coste_uniforme
 from Busqueda_informada.avara import avara
+from Busqueda_informada.A_estrella import a_estrella
 # Las siguientes importaciones se activarán cuando se implementen los algoritmos
 # from Busqueda_no_informada.amplitud import amplitud
 # from Busqueda_no_informada.profundidad_sin_ciclos import profundidad_sin_ciclos
@@ -405,8 +406,11 @@ def ejecutar_algoritmo(algoritmo):
             messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
             return
     elif algoritmo == "A*":
-        messagebox.showinfo("Información", "Algoritmo A* aún no implementado")
-        return
+        try:
+            datos = a_estrella(mapa_original)
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
+            return
     else:
         messagebox.showerror("Error", "Algoritmo no reconocido")
         return
