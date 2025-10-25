@@ -4,7 +4,7 @@
 
 ## Descripción
 
-Simulador que evalúa algoritmos de búsqueda para ayudar a un astronauta a recolectar 3 muestras científicas en Marte. El escenario modela mediante una cuadrícula de 10x10 que representa el entorno del astronauta, incluyendo obstáculos naturales, terrenos de distinta dificultad y una nave auxiliar con combustible limitado.
+Simulador que evalúa algoritmos de búsqueda para ayudar a un astronauta a recolectar 3 muestras científicas en Marte. El escenario se modela mediante una cuadrícula de 10x10 que representa el entorno del astronauta, incluyendo obstáculos naturales, terrenos de distinta dificultad y una nave auxiliar con combustible limitado.
 
 
 ## Algoritmos Implementados
@@ -41,7 +41,7 @@ sudo apt-get install python3-tk  # Ubuntu/Debian
 ```
 smart-astronaut/
 ├── assets/                    # Imágenes y música
-├── Busqueda_no_informada/     # Avara, A*
+├── Busqueda_informada/        # Avara, A*
 ├── Busqueda_no_informada/     # Amplitud, Costo uniforme, Profundidad
 ├── definiciones.py            # Clases Nodo y Arbol
 ├── gui.py                     # Interfaz gráfica
