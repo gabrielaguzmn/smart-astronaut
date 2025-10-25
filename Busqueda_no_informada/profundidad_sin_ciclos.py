@@ -48,7 +48,7 @@ def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
     else:
         if terreno_rocoso:
             coste_nuevo = nodo.getCosto() + 3
-        elif terreno_volcanico:  # ✅ CORREGIDO
+        elif terreno_volcanico:  
             coste_nuevo = nodo.getCosto() + 5
         else:
             coste_nuevo = nodo.getCosto() + 1
@@ -92,7 +92,7 @@ def profundidad_sin_ciclos(mapa: list[list[int]]):
     start_time = time.perf_counter()
     arbol = Arbol(mapa, movimientos)
     
-    while True:
+    while arbol.arbol:
         i = len(arbol.arbol) - 1
         exito = arbol.expandir_nodo(i)
         

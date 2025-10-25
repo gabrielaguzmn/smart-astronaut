@@ -82,8 +82,9 @@ def amplitud(mapa: list[list[int]]):
     
     estados_visitados = set()
 
-    while True:
-        i = 0 
+    while arbol.arbol:
+        
+        i = 0  
         
         nodo_actual = arbol.arbol[i]
         estado_actual = nodo_actual.estado()
@@ -91,8 +92,9 @@ def amplitud(mapa: list[list[int]]):
         if estado_actual in estados_visitados:
             arbol.arbol.pop(i)
             continue
+            
+        estados_visitados.add(estado_actual)
         
-        # estados_visitados.add(estado_actual)
         exito = arbol.expandir_nodo(i)
         
         if exito is not None:
