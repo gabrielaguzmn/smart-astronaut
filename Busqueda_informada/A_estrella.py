@@ -83,7 +83,7 @@ def calcular_heuristica(x: int, y: int, mapa: list, muestras_recolectadas: int) 
     factor_progreso = muestras_faltantes * 0.1 
     factor_desempate = (x + y) * 0.01  
     
-    return distancia_minima + factor_progreso + factor_desempate
+    return distancia_minima/2 + factor_progreso + factor_desempate
 
 def mover_izquierda(nodo: Nodo) -> Nodo | None:
     return mover(nodo, 0, -1)
@@ -138,50 +138,12 @@ def a_estrella(mapa: list[list[int]]):
     x_inicial, y_inicial = nodo_inicial.getUbicacion()
     heuristica_inicial = calcular_heuristica(x_inicial, y_inicial, nodo_inicial.getMapa(), nodo_inicial.getMuestras())
     nodo_inicial.heuristica = heuristica_inicial
-    
-    estados_visitados = set()
-    max_iteraciones = 10000 
 
-    iteracion = 0
-    while arbol.arbol and iteracion < max_iteraciones:
-        iteracion += 1
-       
+    while True:
         i = buscar_mejor_ruta(arbol, mapa)
-        
-        nodo_actual = arbol.arbol[i]
-        estado_actual = nodo_actual.estado()
-        
-        if estado_actual in estados_visitados:
-            arbol.arbol.pop(i)
-            continue
-            
-        estados_visitados.add(estado_actual)
-
         exito = arbol.expandir_nodo(i)
-        
+
         if exito is not None:
-            nodo_meta = None
-            for nodo in arbol.arbol:
-                if nodo.es_meta():
-                    nodo_meta = nodo
-                    break
-            
-            if nodo_meta:
-                exito["Reporte"]["Costo"] = nodo_meta.getCosto()
+            exito["Reporte"]["Costo"] = arbol.arbol[i].getCosto()
             exito["Reporte"]["Tiempo"] = time.perf_counter() - start_time
-            exito["Reporte"]["Iteraciones"] = iteracion
             return exito
-    
-    return {
-        "Camino": [],
-        "Reporte": {
-            "Nodos expandidos": arbol.nodos_expandidos,
-            "Profundidad": arbol.profundidad,
-            "Costo": float('inf'),
-            "Tiempo": time.perf_counter() - start_time,
-            "Iteraciones": iteracion,
-            "Error": "No se encontró solución o se alcanzó el límite de iteraciones"
-        }
-    }
-
-
