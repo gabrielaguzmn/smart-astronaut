@@ -1,3 +1,11 @@
+"""Definiciones de las estructuras de datos para los algoritmos de búsqueda.
+
+Contiene las clases `Nodo` y `Arbol` usadas por los diferentes módulos de
+búsqueda (amplitud, profundidad, costo uniforme, avara, A*). Cada `Nodo`
+representa un estado del mapa con su información de coste, heurística,
+muestras y estado de la nave.
+"""
+
 class Nodo:
     """
     Representa un nodo en el árbol de búsqueda.

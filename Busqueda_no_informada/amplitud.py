@@ -6,7 +6,25 @@ from pathlib import Path
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
 from definiciones import Arbol, Nodo
 
+
+"""Búsqueda por amplitud (BFS) - implementación sencilla.
+
+Este módulo define los movimientos y la función `amplitud(mapa)` que
+realiza una búsqueda por niveles. La implementación usa `Arbol` para
+gestionar la frontera y la expansión de nodos.
+
+Notas importantes:
+- `estados_visitados` se usa para evitar re-expansiones; en esta
+    versión original la línea de marcado está comentada (mantener así
+    para no cambiar la lógica existente).
+"""
+
 def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
+    """Genera el nodo hijo tras mover (dx,dy) si el movimiento es válido.
+
+    Devuelve `None` si el movimiento sale del mapa o golpea un obstáculo.
+    """
+
     mapa = nodo.getMapa()
     alto, ancho = nodo.dimensiones_mapa()
     (x, y) = nodo.getUbicacion()
@@ -77,6 +95,19 @@ movimientos = [lambda n: mover_izquierda(n),
 
 
 def amplitud(mapa: list[list[int]]):
+    """Ejecuta búsqueda en anchura (BFS) sobre `mapa`.
+
+    Implementación:
+    - Crea el `Arbol` con el mapa y las funciones de movimiento.
+    - Mantiene un set `estados_visitados` para detectar estados repetidos
+      (la línea que añade al set está comentada en la implementación original).
+    - En cada ciclo toma el primer nodo de la lista (`i = 0`), lo examina
+      y lo expande con `expandir_nodo`.
+
+    Retorna un dict de éxito con camino y reporte cuando `expandir_nodo`
+    detecta la meta.
+    """
+
     start_time = time.perf_counter()
     arbol = Arbol(mapa, movimientos)
     
@@ -88,10 +119,14 @@ def amplitud(mapa: list[list[int]]):
         nodo_actual = arbol.arbol[i]
         estado_actual = nodo_actual.estado()
         
+        # Si el estado ya fue visitado, eliminar el nodo duplicado de la frontera
         if estado_actual in estados_visitados:
             arbol.arbol.pop(i)
             continue
         
+        # NOTA: la línea que añade el estado a `estados_visitados` está
+        # comentada en la implementación original; la dejamos así para
+        # no modificar la lógica existente.
         # estados_visitados.add(estado_actual)
         exito = arbol.expandir_nodo(i)
         

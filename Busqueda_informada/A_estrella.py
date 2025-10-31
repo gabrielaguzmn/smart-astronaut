@@ -6,6 +6,19 @@ from pathlib import Path
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
 from definiciones import Arbol, Nodo
 
+"""Algoritmo A* para el problema del mapa.
+
+Este módulo define los movimientos, la función de selección de nodo
+según f = g + h y la función principal `a_estrella(mapa)` que ejecuta
+la búsqueda hasta encontrar la meta.
+
+Convenciones:
+- `mapa` es una lista de listas con códigos de celda (0 libre, 1 obstáculo,
+  3 rocoso, 4 volcánico, 5 nave, 6 muestra, 2 inicio).
+- `Arbol` expone `arbol.arbol` (lista de `Nodo`) y `expandir_nodo(indice)`.
+- `Nodo` provee métodos como `getMapa()`, `getUbicacion()`, `getCosto()`,
+  `getMuestras()`, `estado()` y atributos como `f`.
+"""
 def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
 
     mapa = nodo.getMapa()

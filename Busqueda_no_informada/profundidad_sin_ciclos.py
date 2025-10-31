@@ -6,7 +6,20 @@ from pathlib import Path
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
 from definiciones import Arbol, Nodo
 
+
+"""Búsqueda en profundidad sin ciclos.
+
+Esta implementación expande siempre el último nodo de la frontera
+(`i = len(arbol.arbol) - 1`), y utiliza `verificar_ciclos` para evitar
+generar nodos que repitan un estado dentro de la misma rama.
+"""
+
 def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
+    """Genera un posible movimiento desde `nodo` si es válido.
+
+    Mantiene la semántica original de costes y gestión de la nave/muestras.
+    """
+
     mapa = nodo.getMapa()
     alto, ancho = nodo.dimensiones_mapa()
     (x, y) = nodo.getUbicacion()

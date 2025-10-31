@@ -6,7 +6,21 @@ from pathlib import Path
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
 from definiciones import Arbol, Nodo
 
+
+"""Búsqueda de coste uniforme (Uniform Cost Search).
+
+Este módulo selecciona en cada iteración el nodo de menor coste acumulado
+g(n) en la frontera y lo expande. Mantiene la lógica original; aquí se
+añaden docstrings y comentarios que explican variables y el flujo.
+"""
+
 def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
+    """Genera el posible movimiento desde `nodo` desplazando (dx,dy).
+
+    Devuelve `None` si el movimiento no es válido. Se respeta la lógica
+    de costes según terreno y combustible tal como en el diseño original.
+    """
+
     mapa = nodo.getMapa()
     alto, ancho = nodo.dimensiones_mapa()
     (x, y) = nodo.getUbicacion()
@@ -75,6 +89,11 @@ movimientos = [lambda n: mover_izquierda(n),
                lambda n: mover_abajo(n)]
 
 def buscar_menor_costo(arbol: Arbol):
+    """Retorna el índice del nodo en la frontera con menor coste g(n).
+
+    Desempata por mayor número de muestras (favorecer progreso).
+    """
+
     lista = arbol.arbol
     menor_costo = float('inf')
     indice_menor_costo = 0
