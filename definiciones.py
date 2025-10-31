@@ -6,6 +6,9 @@ representa un estado del mapa con su información de coste, heurística,
 muestras y estado de la nave.
 """
 
+from typing import Optional
+
+
 class Nodo:
     """
     Representa un nodo en el árbol de búsqueda.
@@ -23,9 +26,9 @@ class Nodo:
         f (int): Valor de evaluación f(n) = g(n) + h(n).
         profundidad (int): Nivel en el árbol desde la raíz.
     """
-    def __init__(self, padre: "Nodo", ubicacion: tuple, mapa: list[list[int]],
-                 nave: tuple[bool, int], muestras: int, 
-                 costo: float = None, heuristica: float = None):
+    def __init__(self, padre: Optional["Nodo"], ubicacion: tuple, mapa: list[list[int]],
+                 nave: tuple[bool, int], muestras: int,
+                 costo: Optional[float] = None, heuristica: Optional[float] = None):
         # Para el estado del nodo
         self.padre = padre
         self.ubicacion = ubicacion
@@ -37,7 +40,7 @@ class Nodo:
         # Para algoritmos que usen costo y/o heuristica
         self.costo = costo if costo is not None else 0 # g(n)
         self.heuristica = heuristica # h(n)
-        self.f = costo + heuristica if costo is not None and heuristica is not None else 0 # f(n) = g(n) + h(n)
+        self.f = (self.costo + self.heuristica) if (self.heuristica is not None) else self.costo
 
         # Para calcular la profundidad de un arbol
         self.profundidad = 0 if padre is None else padre.profundidad + 1
@@ -132,7 +135,8 @@ class Arbol:
             for y in range(0, ancho):
                 if mapa[x][y] == 2:
                     encontrado = True
-                    self.arbol = [Nodo(None, (x, y), mapa, [False, 0], 0)]
+                    # Usar tupla para representar (tiene_nave, combustible)
+                    self.arbol = [Nodo(None, (x, y), mapa, (False, 0), 0)]
                     break
             if encontrado:
                 break

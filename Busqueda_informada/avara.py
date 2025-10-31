@@ -5,6 +5,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
 from definiciones import Arbol, Nodo
+import copy
 
 
 """Busqueda avara (greedy best-first) para el problema del mapa.
@@ -19,15 +20,13 @@ Conceptos básicos:
     `getMapa()`, `getUbicacion()`, `getCosto()`, `getMuestras()`,
     `getNave()`, `getCombustible()`, `getPadre()`, `estado()` y `es_meta()`.
 
-Variables importantes (en este archivo):
+Variables importantes:
 - `mapa`: lista 2D (grid) con valores que codifican el terreno:
     0=libre, 1=obstáculo, 3=rocoso, 4=volcánico, 5=nave, 6=muestra
 - `arbol.arbol`: lista que actúa como frontera (lista de `Nodo`).
 - `estados_visitados`: set de representaciones hashables de estados
     para evitar re-expansiones.
 
-Nota: este archivo añade documentación y comentarios para facilitar
-la comprensión; no cambia la lógica original.
 """
 
 def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
@@ -45,9 +44,7 @@ def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
     - dentro_del_mapa: bool, si la nueva posición está dentro de límites.
     - no_es_obstaculo: bool, si la celda objetivo no es un obstáculo (valor 1).
     - mapa_nuevo: copia del mapa que se usará para crear el nodo hijo.
-      Nota: se usa `mapa.copy()` (copia superficial). Si `mapa` es una
-      lista de listas, es recomendable usar `copy.deepcopy(mapa)` para
-      evitar aliasing entre nodos (véase TODO abajo).
+      Nota: se usa `mapa.copy()` (copia superficial).
     - padre: referencia al nodo padre para evitar devolver el padre
       inmediato como hijo (retroceso simple).
     - terreno_rocoso / terreno_volcanico / llego_a_la_nave / llego_a_una_muestra:
@@ -77,7 +74,7 @@ def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
         return None
 
     # Copia superficial del mapa (ATENCIÓN: podría requerir deepcopy si es 2D)
-    mapa_nuevo = mapa.copy()
+    mapa_nuevo = copy.deepcopy(mapa)
     padre = nodo.getPadre()
 
     # Detectar tipo de terreno o elementos en la celda destino
@@ -208,7 +205,7 @@ def buscar_mejor_heuristica(arbol: Arbol):
     indice_mejor = 0
 
     for i, nodo in enumerate(lista):
-        heuristica_actual = nodo.heuristica
+        heuristica_actual = nodo.heuristica if nodo.heuristica is not None else float('inf')
         
         if heuristica_actual < mejor_heuristica:
             mejor_heuristica = heuristica_actual

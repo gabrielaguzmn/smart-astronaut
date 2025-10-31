@@ -5,6 +5,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
 from definiciones import Arbol, Nodo
+import copy
 
 
 """Búsqueda de coste uniforme (Uniform Cost Search).
@@ -36,7 +37,7 @@ def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
         return None
     # -----------------------------------------------------------------
 
-    mapa_nuevo = mapa.copy()
+    mapa_nuevo = copy.deepcopy(mapa)
     padre = nodo.getPadre()
 
     terreno_rocoso = (mapa[nuevo_x][nuevo_y] == 3) 
@@ -44,11 +45,11 @@ def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
     llego_a_la_nave = (mapa[nuevo_x][nuevo_y] == 5) 
     llego_a_una_muestra = (mapa[nuevo_x][nuevo_y] == 6) 
         
-    nave_nueva = [nodo.getNave(), nodo.getCombustible()]
+    nave_nueva = (nodo.getNave(), nodo.getCombustible())
     muestras_nuevas = nodo.getMuestras()
 
     if llego_a_la_nave:
-        nave_nueva = [True, 20]
+        nave_nueva = (True, 20)
         mapa_nuevo[nuevo_x][nuevo_y] = 0   
 
     if llego_a_una_muestra:
@@ -57,7 +58,7 @@ def mover(nodo: Nodo, dx: int, dy: int) -> Nodo | None:
 
     if (nodo.getNave() and nodo.getCombustible() > 0):
         coste_nuevo = nodo.getCosto() + 0.5
-        nave_nueva = [True, nodo.getCombustible() - 1]
+        nave_nueva = (True, nodo.getCombustible() - 1)
     else:
         if terreno_rocoso:
             coste_nuevo = nodo.getCosto() + 3

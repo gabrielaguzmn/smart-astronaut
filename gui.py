@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox, ttk
 import pygame
 from PIL import Image, ImageTk
 import numpy as np
+from typing import Optional, Any, cast
 
 from Busqueda_no_informada.coste_uniforme import coste_uniforme
 from Busqueda_informada.avara import avara
@@ -119,7 +120,8 @@ def dibujar_matriz(app, mapa):
                 img_resized = iconos[valor].resize((ancho_celda-2, alto_celda-2), Image.Resampling.LANCZOS)
                 tk_img = ImageTk.PhotoImage(img_resized)
                 celda.config(image=tk_img)
-                celda.image = tk_img
+                # store image reference in runtime attribute to avoid GC
+                setattr(celda, "image", tk_img)
             else:
                 celda.config(text=str(valor))
 
@@ -133,54 +135,61 @@ def actualizar_celda_mapa(fila, columna, valor_mostrar, valor_terreno_original=N
     
     if recuadro_matriz is None:
         return
-        
+
+    if mapa_visual is None:
+        return
+
     # Calcular tamaños de celdas
     filas, columnas = len(mapa_visual), len(mapa_visual[0])
     ancho_celda = 600 // columnas
     alto_celda = 600 // filas
-    
+
     # Obtener el widget de la celda específica
     for widget in recuadro_matriz.winfo_children():
-        info = widget.grid_info()
-        if info['row'] == fila and info['column'] == columna:
+        # Asegurarnos de que trabajamos con un Label
+        if not isinstance(widget, tkinter.Label):
+            continue
+        label = cast(tkinter.Label, widget)
+        info = label.grid_info()
+        if info.get('row') == fila and info.get('column') == columna:
             # Si hay un terreno de fondo (rocas o volcanes) y queremos mostrar astronauta/nave encima
             if valor_terreno_original in [3, 4] and valor_mostrar in [2, 5]:
                 # Crear imagen compuesta (terreno + astronauta/nave)
                 try:
                     imagen_fondo = iconos[valor_terreno_original].resize((ancho_celda-2, alto_celda-2), Image.Resampling.LANCZOS)
                     imagen_encima = iconos[valor_mostrar].resize((ancho_celda-2, alto_celda-2), Image.Resampling.LANCZOS)
-                    
+
                     # Crear una nueva imagen combinada
                     imagen_combinada = imagen_fondo.copy()
                     # Para superponer, hacemos el astronauta/nave semi-transparente
                     if imagen_encima.mode != 'RGBA':
                         imagen_encima = imagen_encima.convert('RGBA')
-                    
+
                     # Aplicar transparencia al elemento superpuesto
                     alpha = Image.new('RGBA', imagen_encima.size, (255, 255, 255, 180))  # 180/255 = ~70% opacidad
                     imagen_encima = Image.composite(imagen_encima, alpha, imagen_encima)
-                    
+
                     imagen_combinada.paste(imagen_encima, (0, 0), imagen_encima)
-                    
+
                     tk_img = ImageTk.PhotoImage(imagen_combinada)
-                    widget.config(image=tk_img)
-                    widget.image = tk_img
+                    label.config(image=tk_img)
+                    setattr(label, "image", tk_img)
                 except Exception:
                     # Si falla la composición, mostrar solo el elemento principal
                     if valor_mostrar in iconos and iconos[valor_mostrar]:
                         img_resized = iconos[valor_mostrar].resize((ancho_celda-2, alto_celda-2), Image.Resampling.LANCZOS)
                         tk_img = ImageTk.PhotoImage(img_resized)
-                        widget.config(image=tk_img)
-                        widget.image = tk_img
+                        label.config(image=tk_img)
+                        setattr(label, "image", tk_img)
             else:
                 # Mostrar normalmente
                 if valor_mostrar in iconos and iconos[valor_mostrar]:
                     img_resized = iconos[valor_mostrar].resize((ancho_celda-2, alto_celda-2), Image.Resampling.LANCZOS)
                     tk_img = ImageTk.PhotoImage(img_resized)
-                    widget.config(image=tk_img)
-                    widget.image = tk_img
+                    label.config(image=tk_img)
+                    setattr(label, "image", tk_img)
                 else:
-                    widget.config(text=str(valor_mostrar), image="")
+                    label.config(text=str(valor_mostrar), image="")
             break
 
 def animar_movimiento(camino, velocidad=400):
@@ -191,6 +200,11 @@ def animar_movimiento(camino, velocidad=400):
         messagebox.showinfo("Información", "No hay camino para animar")
         return
     
+    # Comprobaciones previas para satisfacer al analizador estático
+    if mapa_original is None:
+        messagebox.showerror("Error", "Mapa original no disponible para animación")
+        return
+
     animando = True
     tiene_nave = False
     combustible_restante = 0
@@ -199,6 +213,8 @@ def animar_movimiento(camino, velocidad=400):
     posicion_nave_abandonada = None  # Reset de la posición de nave abandonada
     
     # Restaurar el mapa visual al estado original
+    # Aseguramos que mapa_original no sea None (ver arriba)
+    assert mapa_original is not None
     mapa_visual = mapa_original.copy()
     
     # Limpiar la posición inicial del astronauta (queda como terreno libre)
@@ -218,6 +234,9 @@ def animar_movimiento(camino, velocidad=400):
         fila, columna = pos_actual[0], pos_actual[1]
         
         # Obtener el terreno original en esta posición
+        # Asegurar que mapa_original y mapa_visual existen
+        assert mapa_original is not None
+        assert mapa_visual is not None
         terreno_original = mapa_original[fila][columna]
         
         # Si no es el primer paso, limpiar la posición anterior
@@ -386,34 +405,40 @@ def ejecutar_algoritmo(algoritmo):
         return
 
     datos = None
+
+    # Asegurar que el mapa_original está disponible y convertir a lista si es ndarray
+    if mapa_original is None:
+        messagebox.showerror("Error", "Debe cargar un mapa primero")
+        return
+    mapa_para_algo = mapa_original.tolist() if isinstance(mapa_original, np.ndarray) else mapa_original
     
     if algoritmo == "Amplitud":
         try:
-            datos = amplitud(mapa_original)
+            datos = amplitud(mapa_para_algo)
         except Exception as e:
             messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
             return
     elif algoritmo == "Costo uniforme":
         try:
-            datos = coste_uniforme(mapa_original)
+            datos = coste_uniforme(mapa_para_algo)
         except Exception as e:
             messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
             return
     elif algoritmo == "Profundidad evitando ciclos":
         try:
-            datos = profundidad_sin_ciclos(mapa_original)
+            datos = profundidad_sin_ciclos(mapa_para_algo)
         except Exception as e:
             messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
             return
     elif algoritmo == "Avara":
         try:
-            datos = avara(mapa_original)
+            datos = avara(mapa_para_algo)
         except Exception as e:
             messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
             return
     elif algoritmo == "A*":
         try:
-            datos = a_estrella(mapa_original)
+            datos = a_estrella(mapa_para_algo)
         except Exception as e:
             messagebox.showerror("Error", f"Error al ejecutar el algoritmo: {e}")
             return
@@ -431,12 +456,13 @@ def ejecutar_algoritmo(algoritmo):
     costo = datos["Reporte"]["Costo"]
     tiempo = datos["Reporte"]["Tiempo"]
 
-    # Actualizar el reporte
-    reporte_texto.set(f"Nodos expandidos: {nodos}\n" + 
-                      f"Profundidad del árbol: {profundidad}\n" +
-                      f"Tiempo: {tiempo:.6f} segundos\n" +
-                      f"Costo: {costo}\n" +
-                      f"Pasos: {len(camino)-1}")
+    # Actualizar el reporte (proteger por si reporte_texto aún es None)
+    if reporte_texto is not None:
+        reporte_texto.set(f"Nodos expandidos: {nodos}\n" + 
+                          f"Profundidad del árbol: {profundidad}\n" +
+                          f"Tiempo: {tiempo:.6f} segundos\n" +
+                          f"Costo: {costo}\n" +
+                          f"Pasos: {len(camino)-1}")
     
     # Siempre iniciar la animación del movimiento
     if camino and len(camino) > 0:
@@ -535,7 +561,7 @@ def btn_reiniciar_mapa(app, texto, font_size):
                         img_resized = iconos[valor].resize((ancho_celda-2, alto_celda-2), Image.Resampling.LANCZOS)
                         tk_img = ImageTk.PhotoImage(img_resized)
                         celda.config(image=tk_img)
-                        celda.image = tk_img
+                        setattr(celda, "image", tk_img)
                     else:
                         celda.config(text=str(valor))
 
@@ -593,7 +619,7 @@ def actualizar_pantalla():
 
 app = tkinter.Tk()
 app.title("Smart Astronaut")
-app.resizable(0, 0)
+app.resizable(False, False)
 
 # ----------------- REPRODUCCION DE MUSICA DE FONDO ----------------
 
