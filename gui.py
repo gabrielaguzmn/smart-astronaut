@@ -18,6 +18,7 @@ mapa_original = None  # Para mantener el mapa original sin modificaciones
 mapa_visual = None    # Para el estado visual actual (con muestras recogidas, etc.)
 reporte_texto = None
 recuadro_matriz = None  # Referencia al frame que contiene la matriz
+segunda_muestra_pos = None  # Coordenada (fila, col) donde se recogió la segunda muestra (si aplica)
 animando = False  # Flag para controlar si hay una animación en curso
 posicion_astronauta_original = None  # Para recordar dónde empezó el astronauta
 tiene_nave = False  # Para saber si el astronauta tiene la nave
@@ -98,6 +99,7 @@ def cargar_mapa():
         
 def dibujar_matriz(app, mapa):
     global recuadro_matriz
+    global segunda_muestra_pos
     
     # Crear frame contenedor con tamaño fijo
     recuadro_matriz = tkinter.Frame(app, bg="white", highlightbackground="black", highlightthickness=2,
@@ -127,17 +129,28 @@ def dibujar_matriz(app, mapa):
 
             celda.grid(row=x, column=y, sticky="nsew")
 
+            # Si esta celda es donde se recogió la segunda muestra, resaltarla
+            try:
+                if segunda_muestra_pos and (x, y) == tuple(segunda_muestra_pos):
+                    celda.config(highlightbackground="red", highlightthickness=3)
+            except Exception:
+                # En caso de que segunda_muestra_pos no sea una tupla válida, ignorar
+                pass
+
     return recuadro_matriz
 
 def actualizar_celda_mapa(fila, columna, valor_mostrar, valor_terreno_original=None):
     """Actualiza una celda específica del mapa visual"""
     global recuadro_matriz, mapa_visual
+    global segunda_muestra_pos
     
     if recuadro_matriz is None:
         return
 
+    # Asegurarnos de que el mapa visual existe antes de calcular tamaños
     if mapa_visual is None:
         return
+    assert mapa_visual is not None
 
     # Calcular tamaños de celdas
     filas, columnas = len(mapa_visual), len(mapa_visual[0])
@@ -190,6 +203,16 @@ def actualizar_celda_mapa(fila, columna, valor_mostrar, valor_terreno_original=N
                     setattr(label, "image", tk_img)
                 else:
                     label.config(text=str(valor_mostrar), image="")
+
+            # Resaltar si esta celda coincide con la segunda muestra
+            try:
+                if segunda_muestra_pos and (fila, columna) == tuple(segunda_muestra_pos):
+                    label.config(highlightbackground="red", highlightthickness=3)
+                else:
+                    # Asegurarse de remover el borde si no corresponde
+                    label.config(highlightthickness=0)
+            except Exception:
+                pass
             break
 
 def animar_movimiento(camino, velocidad=400):
@@ -321,7 +344,8 @@ def ver_reporte(app):
                       "Profundidad del árbol: 0\n" +
                       "Tiempo: 0 segundos\n" +
                       "Costo: 0\n" +
-                      "Pasos: 0",)
+                      "Pasos: 0\n" +
+                      "Segunda muestra: N/A",)
 
     tkinter.Label(
         app, 
@@ -387,7 +411,7 @@ def seleccionar_algoritmo(app):
     return busquedas_frame, tipo_algoritmo
 
 def ejecutar_algoritmo(algoritmo):
-    global reporte_texto, animando, mapa_recorrido
+    global reporte_texto, animando, mapa_recorrido, segunda_muestra_pos
     
     # No ejecutar si ya hay una animación en curso
     if animando:
@@ -449,8 +473,10 @@ def ejecutar_algoritmo(algoritmo):
     if datos is None:
         messagebox.showerror("Error", "No se pudo ejecutar el algoritmo")
         return
-
+    
     camino = datos["Camino"]
+    # Guardar la coordenada donde se recogió la segunda muestra (si el algoritmo la devuelve)
+    segunda_muestra_pos = datos.get("SegundaMuestra") if isinstance(datos, dict) else None
     nodos = datos["Reporte"]["Nodos expandidos"]
     profundidad = datos["Reporte"]["Profundidad"]
     costo = datos["Reporte"]["Costo"]
@@ -458,11 +484,19 @@ def ejecutar_algoritmo(algoritmo):
 
     # Actualizar el reporte (proteger por si reporte_texto aún es None)
     if reporte_texto is not None:
+        segunda_txt = "N/A"
+        try:
+            if segunda_muestra_pos:
+                segunda_txt = str(tuple(segunda_muestra_pos))
+        except Exception:
+            segunda_txt = "N/A"
+
         reporte_texto.set(f"Nodos expandidos: {nodos}\n" + 
                           f"Profundidad del árbol: {profundidad}\n" +
                           f"Tiempo: {tiempo:.6f} segundos\n" +
                           f"Costo: {costo}\n" +
-                          f"Pasos: {len(camino)-1}")
+                          f"Pasos: {len(camino)-1}\n" +
+                          f"Segunda muestra: {segunda_txt}")
     
     # Siempre iniciar la animación del movimiento
     if camino and len(camino) > 0:
@@ -525,27 +559,28 @@ def btn_detener_animacion(app, texto, font_size):
 
 def btn_reiniciar_mapa(app, texto, font_size):
     def reiniciar_mapa():
-        global mapa_visual, mapa_original, animando, tiene_nave, posicion_astronauta_original, combustible_restante, mapa_recorrido, posicion_nave_abandonada
-        
+        global mapa_visual, mapa_original, animando, tiene_nave, posicion_astronauta_original, combustible_restante, mapa_recorrido, posicion_nave_abandonada, segunda_muestra_pos
+
         # Detener cualquier animación
         animando = False
-        
+
         if mapa_original is None:
             messagebox.showwarning("Advertencia", "No hay mapa cargado para reiniciar")
             return
-        
+
         # Restaurar el mapa al estado original
         mapa_visual = mapa_original.copy()
         tiene_nave = False
         combustible_restante = 0
         mapa_recorrido = False  # Permitir recorrer el mapa nuevamente
         posicion_nave_abandonada = None  # Limpiar la posición de nave abandonada
-        
+        segunda_muestra_pos = None
+
         # Redibujar la matriz completa
         if recuadro_matriz is not None:
             for widget in recuadro_matriz.winfo_children():
                 widget.destroy()
-            
+
             # Calcular tamaños de celdas
             filas, columnas = len(mapa_visual), len(mapa_visual[0])
             ancho_celda = 600 // columnas
@@ -556,7 +591,7 @@ def btn_reiniciar_mapa(app, texto, font_size):
                 for y in range(columnas):
                     valor = mapa_visual[x][y]
                     celda = tkinter.Label(recuadro_matriz, borderwidth=1, relief="solid")
-                    
+
                     if valor in iconos and iconos[valor]:
                         img_resized = iconos[valor].resize((ancho_celda-2, alto_celda-2), Image.Resampling.LANCZOS)
                         tk_img = ImageTk.PhotoImage(img_resized)
@@ -566,9 +601,14 @@ def btn_reiniciar_mapa(app, texto, font_size):
                         celda.config(text=str(valor))
 
                     celda.grid(row=x, column=y, sticky="nsew")
-        
-        
-    
+
+                    # Resaltar si esta celda coincide con la segunda muestra
+                    try:
+                        if segunda_muestra_pos and (x, y) == tuple(segunda_muestra_pos):
+                            celda.config(highlightbackground="red", highlightthickness=3)
+                    except Exception:
+                        pass
+
     tkinter.Button(
         app,
         text=texto,

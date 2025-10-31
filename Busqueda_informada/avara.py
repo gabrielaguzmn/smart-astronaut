@@ -289,6 +289,23 @@ def avara(mapa: list[list[int]]):
                 exito["Reporte"]["Costo"] = nodo_meta.getCosto()
             exito["Reporte"]["Tiempo"] = time.perf_counter() - start_time
             
+
+            segundaM= None
+            camino = exito.get("Camino", [])
+            muestrasC = 0
+            for coord in camino:
+                if not coord:
+                    continue
+                rx, ry = coord[0], coord[1]
+                if 0 <= rx < len(mapa) and 0 <= ry < len(mapa[0]):
+                    if mapa[rx][ry] == 6:
+                        muestrasC += 1
+                        if muestrasC == 2:
+                            segundaM = (rx, ry)
+                            break
+            exito["SegundaMuestra"] = segundaM
+            print("Segunda muestra recogida en:", segundaM)            
+           
             return exito
     
     # Si no se encontró solución dentro del límite, retornar reporte de error
